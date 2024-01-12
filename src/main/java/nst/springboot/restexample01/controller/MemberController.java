@@ -1,0 +1,89 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package nst.springboot.restexample01.controller;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import nst.springboot.restexample01.converter.impl.MemberConverter;
+import nst.springboot.restexample01.dto.MemberDto;
+import nst.springboot.restexample01.exception.AddingMemberToDepartmentThatNotExistException;
+import nst.springboot.restexample01.exception.DepartmentAlreadyExistException;
+import nst.springboot.restexample01.exception.MemberAlreadyExistException;
+import nst.springboot.restexample01.exception.MyErrorDetails;
+import nst.springboot.restexample01.service.MemberService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * @author student2
+ */
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/members")
+public class MemberController {
+
+    private final MemberService memberService;
+    private final MemberConverter memberConverter;
+
+    @PostMapping("/save")
+    public ResponseEntity<MemberDto> save(@Valid @RequestBody MemberDto member) throws Exception {
+        var memberDto = memberService.save(member);
+        return new ResponseEntity<>(memberDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MemberDto>> getAll() {
+        var members = memberService.getAll();
+        return new ResponseEntity<>(members, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MemberDto> findById(@PathVariable Long id) throws Exception {
+        return memberService.findById(id)
+                .map(memberConverter::toDto)
+                .map(memberDto -> ResponseEntity.ok().body(memberDto))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<MemberDto> update(@RequestBody MemberDto memberDto) throws Exception {
+        var member = memberService.updateMember(memberDto);
+        return new ResponseEntity<>(member, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id) throws Exception {
+        memberService.delete(id);
+        return new ResponseEntity<>("Member removed!", HttpStatus.OK);
+    }
+
+    @PostMapping("/{memberId}/change-academic-title")
+    public ResponseEntity<String> changeAcademicTitle(
+            @PathVariable Long memberId,
+            @RequestParam String academicTitle) throws Exception {
+
+        memberService.changeAcademicTitle(memberId, academicTitle);
+        return ResponseEntity.ok("Member's academic title changed successfully.");
+    }
+
+    @ExceptionHandler(MemberAlreadyExistException.class)
+    public ResponseEntity<MyErrorDetails> handleException(MemberAlreadyExistException e) {
+        System.out.println("-----------pozvana metoda za obradu izuzetka u member kontroleru -------------");
+        MyErrorDetails myErrorDetails = new MyErrorDetails(e.getMessage());
+        return new ResponseEntity<>(myErrorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AddingMemberToDepartmentThatNotExistException.class)
+    public ResponseEntity<MyErrorDetails> handleException(AddingMemberToDepartmentThatNotExistException e) {
+        System.out.println("-----------pozvana metoda za obradu izuzetka u member kontroleru -------------");
+        MyErrorDetails myErrorDetails = new MyErrorDetails(e.getMessage());
+        return new ResponseEntity<>(myErrorDetails, HttpStatus.BAD_REQUEST);
+    }
+}

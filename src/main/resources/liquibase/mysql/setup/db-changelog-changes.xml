@@ -1,0 +1,47 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="change-department" author="d.savic">
+        <sqlFile path="ddl/update-department.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="create-member" author="m.djordjevic">
+        <sqlFile path="ddl/create-member.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="create-academic-title-history" author="m.djordjevic">
+        <sqlFile path="ddl/create-academic-title-history.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="create-head-history" author="m.djordjevic">
+        <sqlFile path="ddl/create-head-history.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="create-secretary-history" author="m.djordjevic">
+        <sqlFile path="ddl/create-secretary-history.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="init-department" author="d.savic">
+        <sqlFile path="dml/init-department.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="init-member" author="d.savic">
+        <sqlFile path="dml/init-member.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="init-academic-title-history" author="d.savic">
+        <sqlFile path="dml/init-academic-title-history.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="init-head-history" author="d.savic">
+        <sqlFile path="dml/init-head-history.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="init-secretary-history" author="d.savic">
+        <sqlFile path="dml/init-secretary-history.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="update-member-with-more-columns" author="m.djordjevic">
+        <sqlFile path="ddl/update-member-with-more-columns.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="update-data-member" author="m.djordjevic">
+        <sqlFile path="dml/update-data-member.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+</databaseChangeLog>
