@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import nst.springboot.restexample01.converter.impl.MemberConverter;
 import nst.springboot.restexample01.converter.impl.MemberDetailsConverter;
 import nst.springboot.restexample01.domain.*;
+import nst.springboot.restexample01.dto.AcademicTitleHistoryUpdateDto;
 import nst.springboot.restexample01.dto.BaseMemberDto;
 import nst.springboot.restexample01.dto.MemberDetailsDto;
 import nst.springboot.restexample01.dto.MemberDto;
@@ -35,7 +36,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberDto save(MemberDto memberDto) throws Exception {
         validateAndSetMemberFields(memberDto);
-        var departmentDto = departmentRepository.findByName(memberDto.getDepartmentName());
+        var departmentDto = departmentRepository.findById(memberDto.getDepartmentId());
         if (departmentDto.isEmpty()) {
             throw new AddingMemberToDepartmentThatNotExistException("Can not add member to department that does not exist.");
         }
@@ -76,8 +77,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDto updateMember(MemberDto memberDto) throws Exception {
-        var existingMember = findMemberById(memberDto.getId());
+    public MemberDto updateMember(Long id, MemberDto memberDto) throws Exception {
+        var existingMember = findMemberById(id);
         updateIfNotBlank(existingMember::setFirstname, memberDto.getFirstname());
         updateIfNotBlank(existingMember::setLastname, memberDto.getLastname());
         updateIfNotBlank(existingMember::setPersonalNo, memberDto.getPersonalNo());
@@ -93,8 +94,8 @@ public class MemberServiceImpl implements MemberService {
             var scientificField = ScientificField.fromString(memberDto.getScientificField());
             existingMember.setScientificField(scientificField.getName());
         }
-        if (!memberDto.getDepartmentName().isBlank()) {
-            var departmentDto = departmentRepository.findByName(memberDto.getDepartmentName());
+        if (!String.valueOf(memberDto.getDepartmentId()).isBlank()) {
+            var departmentDto = departmentRepository.findById(memberDto.getDepartmentId());
             if (departmentDto.isEmpty()) {
                 throw new AddingMemberToDepartmentThatNotExistException("Can not add member to department that does not exist.");
             }
@@ -110,25 +111,22 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findById(id);
     }
 
-    @Override
-    public Optional<MemberDto> findByPersonalNo(String personalNo) {
-        var member = memberRepository.findByPersonalNo(personalNo);
-        return member.map(memberConverter::toDto);
-    }
-
     private void updateIfNotBlank(Consumer<String> setter, String value) {
         if (StringUtils.isNotBlank(value)) {
             setter.accept(value);
         }
     }
 
-    public void changeAcademicTitle(Long memberId, String academicTitleString) throws Exception {
-        var startDate = LocalDate.now();
+    public void changeAcademicTitle(Long memberId, AcademicTitleHistoryUpdateDto academicTitleHistoryUpdateDto) throws Exception {
+        var startDate = academicTitleHistoryUpdateDto.getStartDate();
+        var endDate = LocalDate.now();
         var member = findMemberById(memberId);
-        var academicTitle = AcademicTitle.fromString(academicTitleString);
+        var academicTitle = AcademicTitle.fromString(academicTitleHistoryUpdateDto.getAcademicTitle());
+        var scientificField = ScientificField.fromString(academicTitleHistoryUpdateDto.getScientificField());
         member.setAcademicTitle(academicTitle.name());
+        member.setScientificField(scientificField.name());
         memberRepository.save(member);
-        var academicTitleHistories = academicTitleHistoryRepository.findByMemberIdOrderByStartDate(memberId);
+        var academicTitleHistories = academicTitleHistoryRepository.findByMemberIdAndStartDateBeforeOrderByStartDate(memberId, startDate);
         var latestAcademicTitleHistory = academicTitleHistories.stream().reduce((first, second) -> second).orElse(null);
         if (latestAcademicTitleHistory != null) {
             latestAcademicTitleHistory.setEndDate(startDate);
@@ -138,6 +136,7 @@ public class MemberServiceImpl implements MemberService {
                 .builder()
                 .member(member)
                 .startDate(startDate)
+                .endDate(endDate)
                 .academicTitle(academicTitle.name())
                 .scientificField(member.getScientificField())
                 .build();

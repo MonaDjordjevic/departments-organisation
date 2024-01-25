@@ -18,7 +18,7 @@ public interface SubjectService {
 
     void delete(Long id) throws Exception;
 
-    SubjectDto update(SubjectDto subjectDto) throws Exception;
+    SubjectDto update(Long id, SubjectDto subjectDto) throws Exception;
 
     SubjectDto findById(Long id) throws Exception;
 }

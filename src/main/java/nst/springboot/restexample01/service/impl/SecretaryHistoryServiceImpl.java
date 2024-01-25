@@ -7,6 +7,7 @@ import nst.springboot.restexample01.dto.SecretaryHistoryDto;
 import nst.springboot.restexample01.repository.SecretaryHistoryRepository;
 import nst.springboot.restexample01.service.SecretaryHistoryService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,6 @@ public class SecretaryHistoryServiceImpl implements SecretaryHistoryService {
 
     private final SecretaryHistoryRepository<SecretaryHistory> secretaryHistoryRepository;
     private final SecretaryHistoryConverter secretaryHistoryConverter;
-
 
     @Override
     public List<SecretaryHistoryDto> getAll() {
@@ -39,6 +39,7 @@ public class SecretaryHistoryServiceImpl implements SecretaryHistoryService {
 
     @Override
     public List<SecretaryHistoryDto> getSecretaryHistoryOfDepartment(Long departmentId) {
+        Assert.hasText(String.valueOf(departmentId), "Department id must not be null.");
         var secretaryHistories = secretaryHistoryRepository.findSecretaryHistoriesByDepartmentIdOrderByStartDate(departmentId);
         return secretaryHistories.stream()
                 .map(secretaryHistoryConverter::toDto)

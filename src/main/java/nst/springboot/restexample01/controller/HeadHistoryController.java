@@ -20,18 +20,13 @@ public class HeadHistoryController {
     public ResponseEntity<List<HeadHistoryDto>> getAll() {
         return ResponseEntity.ok(headHistoryService.getAll());
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<HeadHistoryDto> findById(@PathVariable Long id) throws Exception {
         return ResponseEntity.ok(headHistoryService.findById(id));
     }
 
-    @GetMapping("/department/{departmentId}")
-    public ResponseEntity<List<HeadHistoryDto>> getHeadHistoryOfDepartment(@PathVariable Long departmentId) {
-        List<HeadHistoryDto> headHistoryDtoList = headHistoryService.getHeadHistoryOfDepartment(departmentId);
-        return new ResponseEntity<>(headHistoryDtoList, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) throws Exception {
         headHistoryService.delete(id);
         return new ResponseEntity<>("Head history removed!", HttpStatus.OK);

@@ -1,17 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package nst.springboot.restexample01.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nst.springboot.restexample01.dto.DepartmentDto;
 import nst.springboot.restexample01.dto.DepartmentUpdateDetailsDto;
-import nst.springboot.restexample01.dto.SubjectDto;
+import nst.springboot.restexample01.dto.HeadHistoryDto;
+import nst.springboot.restexample01.dto.SecretaryHistoryDto;
 import nst.springboot.restexample01.exception.DepartmentAlreadyExistException;
 import nst.springboot.restexample01.exception.MyErrorDetails;
 import nst.springboot.restexample01.service.DepartmentService;
+import nst.springboot.restexample01.service.HeadHistoryService;
+import nst.springboot.restexample01.service.SecretaryHistoryService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,19 +18,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
-/**
- * @author student2
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/departments")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
+    private final SecretaryHistoryService secretaryHistoryService;
+    private final HeadHistoryService headHistoryService;
 
-    @PostMapping("/save")
+    @PostMapping()
     public ResponseEntity<DepartmentDto> save(@Valid @RequestBody DepartmentDto departmentDto) throws Exception {
         DepartmentDto deptDto = departmentService.save(departmentDto);
         return new ResponseEntity<>(deptDto, HttpStatus.CREATED);
@@ -60,7 +59,7 @@ public class DepartmentController {
         return new ResponseEntity<>(departments, HttpStatus.OK);
     }
 
-    @GetMapping("/findDepartment/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<DepartmentDto> findById(@PathVariable("id") Long id) throws Exception {
         return ResponseEntity.ok(departmentService.findById(id));
     }
@@ -78,27 +77,39 @@ public class DepartmentController {
         return new ResponseEntity<>(myErrorDetails, HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/{departmentId}/change-secretary")
+    @PostMapping("/{departmentId}/secretary-change")
     public ResponseEntity<String> changeSecretary(
             @PathVariable Long departmentId,
-            @RequestParam Long secretaryId) throws Exception {
+            @RequestParam Long secretaryId, @RequestParam LocalDate startDate) throws Exception {
 
-        departmentService.changeSecretary(departmentId, secretaryId);
+        departmentService.changeSecretary(departmentId, secretaryId, startDate);
         return ResponseEntity.ok("Department's secretary changed successfully.");
     }
 
-    @PostMapping("/{departmentId}/change-head")
+    @PostMapping("/{departmentId}/head-change")
     public ResponseEntity<String> changeHead(
             @PathVariable Long departmentId,
-            @RequestParam Long headId) throws Exception {
+            @RequestParam Long headId, @RequestParam LocalDate startDate) throws Exception {
 
-        departmentService.changeHead(departmentId, headId);
+        departmentService.changeHead(departmentId, headId, startDate);
         return ResponseEntity.ok("Department's head changed successfully.");
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<DepartmentUpdateDetailsDto> update(@RequestBody DepartmentUpdateDetailsDto departmentDto) throws Exception {
-        var department = departmentService.update(departmentDto);
+    @PutMapping("/{id}")
+    public ResponseEntity<DepartmentUpdateDetailsDto> update(@PathVariable Long id, @RequestBody DepartmentUpdateDetailsDto departmentDto) throws Exception {
+        var department = departmentService.update(id, departmentDto);
         return new ResponseEntity<>(department, HttpStatus.OK);
+    }
+
+    @GetMapping("/{departmentId}/secretary-history")
+    public ResponseEntity<List<SecretaryHistoryDto>> findSecretaryHistoryOfDepartment(@PathVariable Long departmentId) {
+        var secretaryHistoryDtoList = secretaryHistoryService.getSecretaryHistoryOfDepartment(departmentId);
+        return new ResponseEntity<>(secretaryHistoryDtoList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{departmentId}/head-history")
+    public ResponseEntity<List<HeadHistoryDto>> findHeadHistoryOfDepartment(@PathVariable Long departmentId) {
+        var headHistoryDtoList = headHistoryService.getHeadHistoryOfDepartment(departmentId);
+        return new ResponseEntity<>(headHistoryDtoList, HttpStatus.OK);
     }
 }

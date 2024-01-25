@@ -13,12 +13,9 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AcademicTitleHistoryDto implements Serializable {
+public class AcademicTitleHistoryUpdateDto implements Serializable {
 
-    private Long id;
-    private Long memberId;
     private LocalDate startDate;
-    private LocalDate endDate;
     @NotBlank
     private String academicTitle;
     @NotBlank

@@ -12,10 +12,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
-/**
- * @author Dules
- */
-
 @Data
 @SuperBuilder
 @AllArgsConstructor
@@ -23,5 +19,5 @@ import java.io.Serializable;
 public class MemberDetailsDto extends BaseMemberDto implements Serializable {
 
     @JsonIgnore
-    private String departmentName;
+    private Long departmentId;
 }

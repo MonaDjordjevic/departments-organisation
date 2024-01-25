@@ -26,14 +26,7 @@ public class AcademicTitleHistoryController {
         return ResponseEntity.ok(academicTitleHistoryService.findById(id));
     }
 
-    @GetMapping("/member/{memberId}")
-    public ResponseEntity<List<AcademicTitleHistoryDto>> getAcademicTitleHistoryForMember(@PathVariable Long memberId) {
-        List<AcademicTitleHistoryDto> historyList = academicTitleHistoryService.getAcademicTitleHistoryForMember(memberId);
-        return ResponseEntity.ok(historyList);
-    }
-
-
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) throws Exception {
         academicTitleHistoryService.delete(id);
         return new ResponseEntity<>("Academic history removed!", HttpStatus.OK);

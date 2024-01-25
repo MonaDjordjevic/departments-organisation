@@ -64,8 +64,8 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public SubjectDto update(SubjectDto subjectDto) throws Exception {
-        var existingSubject = findSubjectById(subjectDto.getId());
+    public SubjectDto update(Long id, SubjectDto subjectDto) throws Exception {
+        var existingSubject = findSubjectById(id);
         if (!subjectDto.getName().isBlank()) {
             existingSubject.setName(subjectDto.getName());
         }
@@ -101,13 +101,6 @@ public class SubjectServiceImpl implements SubjectService {
     private Subject findSubjectById(Long subjectId) throws Exception {
         return subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new Exception("Subject not found with id: " + subjectId));
-    }
-
-    private <T> void updateIfNotBlank(Consumer<T> setter, String value, Function<String, T> transformer) throws Exception {
-        if (StringUtils.isNotBlank(value)) {
-            T transformedValue = transformer.apply(value);
-            setter.accept(transformedValue);
-        }
     }
 
 }

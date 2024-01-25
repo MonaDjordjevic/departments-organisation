@@ -1,17 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package nst.springboot.restexample01.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nst.springboot.restexample01.converter.impl.MemberConverter;
+import nst.springboot.restexample01.dto.AcademicTitleHistoryDto;
+import nst.springboot.restexample01.dto.AcademicTitleHistoryUpdateDto;
 import nst.springboot.restexample01.dto.MemberDto;
 import nst.springboot.restexample01.exception.AddingMemberToDepartmentThatNotExistException;
-import nst.springboot.restexample01.exception.DepartmentAlreadyExistException;
 import nst.springboot.restexample01.exception.MemberAlreadyExistException;
 import nst.springboot.restexample01.exception.MyErrorDetails;
+import nst.springboot.restexample01.service.AcademicTitleHistoryService;
 import nst.springboot.restexample01.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * @author student2
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
@@ -29,8 +24,9 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberConverter memberConverter;
+    private final AcademicTitleHistoryService academicTitleHistoryService;
 
-    @PostMapping("/save")
+    @PostMapping()
     public ResponseEntity<MemberDto> save(@Valid @RequestBody MemberDto member) throws Exception {
         var memberDto = memberService.save(member);
         return new ResponseEntity<>(memberDto, HttpStatus.CREATED);
@@ -52,25 +48,27 @@ public class MemberController {
 
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<MemberDto> update(@RequestBody MemberDto memberDto) throws Exception {
-        var member = memberService.updateMember(memberDto);
+    @PutMapping("/{id}")
+    public ResponseEntity<MemberDto> update(@PathVariable Long id, @RequestBody MemberDto memberDto) throws Exception {
+        var member = memberService.updateMember(id, memberDto);
         return new ResponseEntity<>(member, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) throws Exception {
         memberService.delete(id);
         return new ResponseEntity<>("Member removed!", HttpStatus.OK);
     }
 
-    @PostMapping("/{memberId}/change-academic-title")
-    public ResponseEntity<String> changeAcademicTitle(
-            @PathVariable Long memberId,
-            @RequestParam String academicTitle) throws Exception {
-
-        memberService.changeAcademicTitle(memberId, academicTitle);
+    @PostMapping("/{memberId}/academic-title-update")
+    public ResponseEntity<String> changeAcademicTitle(@PathVariable Long memberId, @RequestBody AcademicTitleHistoryUpdateDto academicTitleHistoryUpdateDto) throws Exception {
+        memberService.changeAcademicTitle(memberId, academicTitleHistoryUpdateDto);
         return ResponseEntity.ok("Member's academic title changed successfully.");
+    }
+
+    @GetMapping("/{memberId}/academic-title-history")
+    public List<AcademicTitleHistoryDto> getAcademicTitleHistory(@PathVariable Long memberId) {
+        return academicTitleHistoryService.getAcademicTitleHistoryForMember(memberId);
     }
 
     @ExceptionHandler(MemberAlreadyExistException.class)

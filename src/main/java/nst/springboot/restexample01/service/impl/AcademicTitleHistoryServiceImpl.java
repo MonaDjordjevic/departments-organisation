@@ -7,6 +7,7 @@ import nst.springboot.restexample01.dto.AcademicTitleHistoryDto;
 import nst.springboot.restexample01.repository.AcademicTitleHistoryRepository;
 import nst.springboot.restexample01.service.AcademicTitleHistoryService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,6 @@ public class AcademicTitleHistoryServiceImpl implements AcademicTitleHistoryServ
 
     private final AcademicTitleHistoryConverter academicTitleHistoryConverter;
     private final AcademicTitleHistoryRepository academicTitleHistoryRepository;
-
 
     @Override
     public List<AcademicTitleHistoryDto> getAll() {
@@ -33,7 +33,6 @@ public class AcademicTitleHistoryServiceImpl implements AcademicTitleHistoryServ
         academicTitleHistoryRepository.delete(academicHistory);
     }
 
-
     @Override
     public AcademicTitleHistoryDto findById(Long id) throws Exception {
         var academicHistory = findByAcademicHistoryId(id);
@@ -42,6 +41,7 @@ public class AcademicTitleHistoryServiceImpl implements AcademicTitleHistoryServ
 
     @Override
     public List<AcademicTitleHistoryDto> getAcademicTitleHistoryForMember(Long memberId) {
+        Assert.hasText(String.valueOf(memberId), "Member id must not be null");
         var academicTitleHistoryList = academicTitleHistoryRepository.findByMemberIdOrderByStartDate(memberId);
         return academicTitleHistoryList.stream()
                 .map(academicTitleHistoryConverter::toDto)

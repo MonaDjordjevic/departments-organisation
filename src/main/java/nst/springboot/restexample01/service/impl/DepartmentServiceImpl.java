@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package nst.springboot.restexample01.service.impl;
 
 import io.micrometer.common.util.StringUtils;
@@ -24,15 +20,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
-/**
- * @author student2
- */
 @Service
 @AllArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
@@ -52,8 +44,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         validateDepartmentDoesNotExist(departmentDto.getName());
         memberService.validateAndSetMemberFields(departmentDto.getSecretary());
         memberService.validateAndSetMemberFields(departmentDto.getHead());
-        var secretary = prepareMember(departmentDto.getSecretary(), departmentDto.getName(), MemberRole.SECRETARY);
-        var head = prepareMember(departmentDto.getHead(), departmentDto.getName(), MemberRole.HEAD);
+        var secretary = prepareMember(departmentDto.getSecretary(), departmentDto.getId(), MemberRole.SECRETARY);
+        var head = prepareMember(departmentDto.getHead(), departmentDto.getId(), MemberRole.HEAD);
 
         var department = departmentRepository.save(departmentConverter.toEntity(departmentDto));
         var savedSecretary = memberService.savingMember(secretary);
@@ -76,8 +68,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public DepartmentUpdateDetailsDto update(DepartmentUpdateDetailsDto department) throws Exception {
-        var existingDepartment = getDepartment(department.getId());
+    public DepartmentUpdateDetailsDto update(Long id, DepartmentUpdateDetailsDto department) throws Exception {
+        var existingDepartment = getDepartment(id);
         updateIfNotBlank(existingDepartment::setName, department.getName());
         updateIfNotBlank(existingDepartment::setShortName, department.getShortName());
         var savedDepartment = departmentRepository.save(existingDepartment);
@@ -93,26 +85,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public Optional<DepartmentDto> findByName(String name) {
-        Optional<Department> dept = departmentRepository.findByName(name);
-        if (dept.isPresent()) {
-            Department department = dept.get();
-            return Optional.of(departmentConverter.toDto(department));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public void changeSecretary(Long departmentId, Long secretaryId) throws Exception {
-        var startDate = LocalDate.now();
+    public void changeSecretary(Long departmentId, Long secretaryId, LocalDate startDate) throws Exception {
         var department = getDepartment(departmentId);
         var secretary = getDepartmentMember(secretaryId, departmentId, MemberRole.SECRETARY);
         updateRoleAndHistory(MemberRole.SECRETARY, startDate, secretary, department);
     }
 
     @Override
-    public void changeHead(Long departmentId, Long headId) throws Exception {
-        var startDate = LocalDate.now();
+    public void changeHead(Long departmentId, Long headId, LocalDate startDate) throws Exception {
         var department = getDepartment(departmentId);
         var head = getDepartmentMember(headId, departmentId, MemberRole.HEAD);
         updateRoleAndHistory(MemberRole.HEAD, startDate, head, department);
@@ -137,8 +117,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departments;
     }
 
-    private MemberDetailsDto prepareMember(MemberDetailsDto member, String departmentName, MemberRole role) {
-        member.setDepartmentName(departmentName);
+    private MemberDetailsDto prepareMember(MemberDetailsDto member, Long departmentId, MemberRole role) {
+        member.setDepartmentId(departmentId);
         member.setMemberRole(role);
         return member;
     }
@@ -161,7 +141,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private void updateRoleAndHistory(MemberRole memberRole, LocalDate startDate, Member member, Department department) {
         var currentMember = memberRepository.findByMemberRoleAndDepartmentId(memberRole, member.getDepartment().getId());
-        var histories = getHistories(memberRole, member.getDepartment().getId());
+        var histories = getHistories(memberRole, member.getDepartment().getId(), startDate);
         var latestHistory = getLatestHistory(histories);
         currentMember.ifPresent(existingMember -> {
             if (latestHistory != null && !startDate.isEqual(latestHistory.getEndDate())) {
@@ -177,10 +157,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         saveHistory(createHistory(memberRole, member, startDate, department), memberRole);
     }
 
-    private List<? extends History> getHistories(MemberRole role, Long departmentId) {
+    private List<? extends History> getHistories(MemberRole role, Long departmentId, LocalDate startDate) {
         return (role == MemberRole.SECRETARY) ?
-                secretaryHistoryRepository.findSecretaryHistoriesByDepartmentIdOrderByStartDate(departmentId) :
-                headHistoryRepository.findByDepartmentIdOrderByStartDate(departmentId);
+                secretaryHistoryRepository.findByDepartmentIdAndStartDateBeforeOrderByStartDate(departmentId, startDate) :
+                headHistoryRepository.findByDepartmentIdAndStartDateBeforeOrderByStartDate(departmentId, startDate);
     }
 
     private <S extends History> S getLatestHistory(List<S> histories) {

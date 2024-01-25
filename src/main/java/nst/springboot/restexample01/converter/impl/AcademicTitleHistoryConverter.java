@@ -1,35 +1,26 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package nst.springboot.restexample01.converter.impl;
 
 import lombok.AllArgsConstructor;
 import nst.springboot.restexample01.converter.DtoEntityConverter;
 import nst.springboot.restexample01.domain.AcademicTitleHistory;
 import nst.springboot.restexample01.dto.AcademicTitleHistoryDto;
+import nst.springboot.restexample01.repository.MemberRepository;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
-/**
- * @author student2
- */
 
 @Component
 @AllArgsConstructor
 public class AcademicTitleHistoryConverter implements DtoEntityConverter<AcademicTitleHistoryDto, AcademicTitleHistory> {
 
-    private final MemberConverter memberConverter;
+    private final MemberRepository memberRepository;
 
     @Override
     public AcademicTitleHistoryDto toDto(AcademicTitleHistory academicTitleHistory) {
         return AcademicTitleHistoryDto.builder()
                 .id(academicTitleHistory.getId())
-                .startDate(formatDate(academicTitleHistory.getStartDate()))
-                .endDate(formatDate(academicTitleHistory.getEndDate()))
-                .member(memberConverter.toDto(academicTitleHistory.getMember()))
+                .startDate(academicTitleHistory.getStartDate())
+                .endDate(academicTitleHistory.getEndDate())
+                .memberId(academicTitleHistory.getMember().getId())
                 .academicTitle(academicTitleHistory.getAcademicTitle())
                 .scientificField(academicTitleHistory.getScientificField())
                 .build();
@@ -37,19 +28,14 @@ public class AcademicTitleHistoryConverter implements DtoEntityConverter<Academi
 
     @Override
     public AcademicTitleHistory toEntity(AcademicTitleHistoryDto academicTitleHistoryDto) {
+        var member = memberRepository.findById(academicTitleHistoryDto.getMemberId());
         return AcademicTitleHistory.builder()
                 .id(academicTitleHistoryDto.getId())
                 .startDate(academicTitleHistoryDto.getStartDate())
                 .endDate(academicTitleHistoryDto.getEndDate())
-                .member(memberConverter.toEntity(academicTitleHistoryDto.getMember()))
+                .member(member.orElse(null))
                 .academicTitle(academicTitleHistoryDto.getAcademicTitle())
                 .scientificField(academicTitleHistoryDto.getScientificField())
                 .build();
-    }
-
-    private LocalDate formatDate(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        String formattedDate = date.format(formatter);
-        return LocalDate.parse(formattedDate, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 }

@@ -1,7 +1,7 @@
 package nst.springboot.restexample01.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,12 +22,11 @@ public class AcademicTitleHistory {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @JsonFormat(pattern = "dd.MM.yyyy")
+    @PastOrPresent
     @Column(name = "start_date")
     private LocalDate startDate;
 
     @Column(name = "end_date")
-    @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDate endDate;
 
     @ManyToOne

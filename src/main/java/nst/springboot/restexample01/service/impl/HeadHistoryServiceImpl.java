@@ -7,6 +7,7 @@ import nst.springboot.restexample01.dto.HeadHistoryDto;
 import nst.springboot.restexample01.repository.HeadHistoryRepository;
 import nst.springboot.restexample01.service.HeadHistoryService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ public class HeadHistoryServiceImpl implements HeadHistoryService {
 
     @Override
     public List<HeadHistoryDto> getHeadHistoryOfDepartment(Long departmentId) {
+        Assert.hasText(String.valueOf(departmentId), "Department id must not be null.");
         var headHistoryList = headHistoryRepository.findByDepartmentIdOrderByStartDate(departmentId);
         return headHistoryList.stream()
                 .map(headHistoryConverter::toDto)

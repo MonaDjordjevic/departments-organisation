@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package nst.springboot.restexample01.converter.impl;
 
 import lombok.AllArgsConstructor;
@@ -10,10 +6,6 @@ import nst.springboot.restexample01.domain.Member;
 import nst.springboot.restexample01.dto.MemberDto;
 import nst.springboot.restexample01.repository.DepartmentRepository;
 import org.springframework.stereotype.Component;
-
-/**
- * @author student2
- */
 
 @Component
 @AllArgsConstructor
@@ -28,7 +20,7 @@ public class MemberConverter implements DtoEntityConverter<MemberDto, Member> {
                 .firstname(entity.getFirstname())
                 .lastname(entity.getLastname())
                 .personalNo(entity.getPersonalNo())
-                .departmentName(entity.getDepartment().getName())
+                .departmentId(entity.getDepartment().getId())
                 .academicTitle(entity.getAcademicTitle())
                 .educationTitle(entity.getEducationTitle())
                 .scientificField(entity.getScientificField())
@@ -38,7 +30,7 @@ public class MemberConverter implements DtoEntityConverter<MemberDto, Member> {
 
     @Override
     public Member toEntity(MemberDto dto) {
-        var department = departmentRepository.findByName(dto.getDepartmentName());
+        var department = departmentRepository.findById(dto.getDepartmentId());
         return Member.builder()
                 .id(dto.getId())
                 .firstname(dto.getFirstname())

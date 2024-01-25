@@ -26,13 +26,7 @@ public class SecretaryHistoryController {
         return ResponseEntity.ok(secretaryHistoryService.findById(id));
     }
 
-    @GetMapping("/department/{departmentId}")
-    public ResponseEntity<List<SecretaryHistoryDto>> getSecretaryHistoryOfDepartment(@PathVariable Long departmentId) {
-        List<SecretaryHistoryDto> secretaryHistoryDtoList = secretaryHistoryService.getSecretaryHistoryOfDepartment(departmentId);
-        return new ResponseEntity<>(secretaryHistoryDtoList, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) throws Exception {
         secretaryHistoryService.delete(id);
         return new ResponseEntity<>("Secretary history removed!", HttpStatus.OK);
